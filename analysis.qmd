@@ -1,6 +1,6 @@
 ---
 title: "Analyzing US Census Data"
-author: "Your Name"
+author: "Sakith"
 execute:
   echo: false
 ---
@@ -14,4 +14,94 @@ This is the starting Quarto document for the Census tutorial.
 library(tidyverse)
 library(tidycensus)
 library(sf)
+```
+## Texas income
+
+```{r}
+#| message: false
+income_tx <- tryCatch(
+  {
+    get_acs(
+      geography = "county",
+      variables = "B19013_001",
+      state = "TX",
+      year = 2020,
+      geometry = TRUE
+    )
+  },
+  error = function(e) {
+    message("ACS request failed: ", conditionMessage(e))
+    NULL
+  }
+)
+```
+
+```{r}
+if (!is.null(income_tx)) {
+  income_tx
+} else {
+  message("income_tx is unavailable because the ACS request failed.")
+}
+```
+
+```{r}
+if (!is.null(income_tx)) {
+  glimpse(income_tx)
+} else {
+  message("income_tx is unavailable because the ACS request failed.")
+}
+```
+
+```{r}
+if (!is.null(income_tx)) {
+  income_tx |>
+    st_drop_geometry() |>
+    summarize(
+      min_income = min(estimate),
+      median_income = median(estimate),
+      max_income = max(estimate),
+      median_moe = median(moe)
+    )
+} else {
+  message("income_tx is unavailable because the ACS request failed.")
+}
+```
+
+```{r}
+if (!is.null(income_tx)) {
+  ggplot(income_tx, aes(x = estimate)) +
+    geom_histogram(bins = 30, fill = "#2b8cbe", color = "white") +
+    labs(
+      title = "Distribution of median household income across Texas counties",
+      x = "Median household income",
+      y = "Number of counties"
+    ) +
+    theme_minimal()
+} else {
+  message("income_tx is unavailable because the ACS request failed.")
+}
+```
+
+```{r}
+if (!is.null(income_tx)) {
+  ggplot(income_tx) +
+    geom_sf(aes(fill = estimate))
+} else {
+  message("income_tx is unavailable because the ACS request failed.")
+}
+```
+
+```{r}
+if (!is.null(income_tx)) {
+  ggplot(income_tx) +
+    geom_sf(aes(fill = estimate), color = "white", size = 0.1) +
+    scale_fill_viridis_c(option = "plasma", name = "Median income") +
+    labs(
+      title = "Median household income by county, Texas (2020)",
+      caption = "Source: ACS 5-year estimates via tidycensus"
+    ) +
+    theme_void()
+} else {
+  message("income_tx is unavailable because the ACS request failed.")
+}
 ```
