@@ -1,0 +1,17 @@
+---
+title: "Analyzing US Census Data"
+author: "Your Name"
+execute:
+  echo: false
+---
+
+## Introduction
+
+This is the starting Quarto document for the Census tutorial.
+
+```{r}
+#| message: false
+library(tidyverse)
+library(tidycensus)
+library(sf)
+```
